@@ -4,6 +4,8 @@ import { Filter } from './Filter/Filter';
 import { Form } from './Form/Form';
 import { Container } from './Container/Container';
 
+const CONTACTS_KEY = 'contacts-list';
+
 class App extends Component {
   state = {
     contacts: [
@@ -16,6 +18,21 @@ class App extends Component {
     name: '',
     number: '',
   };
+
+  componentDidMount() {
+    if (localStorage.getItem(CONTACTS_KEY)) {
+      const localContactsList = JSON.parse(localStorage.getItem(CONTACTS_KEY));
+      this.setState({ contacts: localContactsList });
+    }
+  }
+
+  componentDidUpdate(prevProp, prevState) {
+    const { contacts } = this.state;
+
+    if (prevState.contacts.length !== contacts.length) {
+      localStorage.setItem(CONTACTS_KEY, JSON.stringify(contacts));
+    }
+  }
 
   handlerSubmit = data => {
     const inContacts = this.state.contacts.some(
@@ -43,7 +60,7 @@ class App extends Component {
       return name.toLocaleLowerCase().includes(filter.toLocaleLowerCase());
     });
   };
-  
+
   handlerDelete = id => {
     this.setState({
       contacts: this.state.contacts.filter(contact => id !== contact.id),
