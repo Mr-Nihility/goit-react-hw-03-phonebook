@@ -1,98 +1,72 @@
-import { Component } from 'react';
-import { ContactList } from './ContactList/ContactList';
-import { Filter } from './Filter/Filter';
-import { Form } from './Form/Form';
-import { Container } from './Container/Container';
+import { Component } from "react";
+import { PhonebookForm } from "./PhonebookForm/PhonebookForm";
+import { Section } from "./Section/Section";
+import { nanoid } from 'nanoid'
+import { Contacts } from "./Contacts/Contacts";
+import { FindByName } from "./FindByName/FindByName"
 
-const CONTACTS_KEY = 'contacts-list';
 
-class App extends Component {
-  state = {
-    contacts: [
-      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
-    filter: '',
-    name: '',
-    number: '',
-  };
+
+export class App extends Component {
+  state= {
+  contacts: [  {id: 'id-1', name: 'Rosie Simpson', phone: '459-12-56'},
+    {id: 'id-2', name: 'Hermione Kline', phone: '443-89-12'},
+    {id: 'id-3', name: 'Eden Clements', phone: '645-17-79'},
+    {id: 'id-4', name: 'Annie Copeland', phone: '227-91-26'}],
+    filter: ""
+  }
 
   componentDidMount() {
-    if (localStorage.getItem(CONTACTS_KEY)) {
-      const localContactsList = JSON.parse(localStorage.getItem(CONTACTS_KEY));
-      this.setState({ contacts: localContactsList });
+    const savedContacts = localStorage.getItem('localContacts')
+    if(savedContacts) {
+      this.setState({contacts:JSON.parse(savedContacts)})
+    } 
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if(prevState.contacts !== this.state.contacts) {
+      localStorage.setItem("localContacts", JSON.stringify(this.state.contacts))
     }
   }
 
-  componentDidUpdate(prevProp, prevState) {
-    const { contacts } = this.state;
+    handlerSubmit = (contact) => { 
+      const isHere = this.state.contacts.some(({name}) => name === contact.name)
 
-    if (prevState.contacts.length !== contacts.length) {
-      localStorage.setItem(CONTACTS_KEY, JSON.stringify(contacts));
+      if (isHere) {
+        alert(`Name already in contacts`)
+      return         
+      }
+      this.setState((ps) => ({ contacts: [...ps.contacts, {...contact, id: nanoid()}] }) )
+        
     }
-  }
-
-  handlerSubmit = data => {
-    const inContacts = this.state.contacts.some(
-      contact =>
-        data.name.toLocaleLowerCase() === contact.name.toLocaleLowerCase()
-    );
-    if (inContacts) {
-      alert(`${data.name} is already in contacts`);
-      return;
+    
+    handleChange = (event) => {
+      const {value} = event.target
+      this.setState({filter : value})
     }
 
-    this.setState(prev => {
-      return { contacts: [...prev.contacts, data] };
-    });
-  };
+    handleFilters = () => {
+          const {contacts, filter} = this.state
+      return contacts.filter((contact) => contact.name.toLowerCase().includes(filter.toLowerCase()))
+    }
 
-  handlerFilter = ({ target: { value } }) => {
-    this.setState({ filter: value });
-  };
-
-  getVisableContacts = () => {
-    const { contacts, filter } = this.state;
-
-    return contacts.filter(({ name }) => {
-      return name.toLocaleLowerCase().includes(filter.toLocaleLowerCase());
-    });
-  };
-
-  handlerDelete = id => {
-    this.setState({
-      contacts: this.state.contacts.filter(contact => id !== contact.id),
-    });
-  };
+    handleDelete = (id) =>{
+      this.setState((ps) => ({contacts :ps.contacts.filter((el) => el.id !== id)}))
+    }
 
   render() {
-    const { filter } = this.state;
-    return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          fontSize: 40,
-          color: '#010101',
-        }}
-      >
-        <Container title="Phonebook">
-          <Form onSubmit={this.handlerSubmit} />
-        </Container>
-        <Container title="Contacts">
-          <Filter filter={filter} handlerFilter={this.handlerFilter} />
-          <ContactList
-            contacts={this.getVisableContacts()}
-            onDelete={this.handlerDelete}
-          />
-        </Container>
-      </div>
-    );
+    const {filter} = this.state
+    return(<>
+      <Section title= "phonebook">
+      <PhonebookForm onSubmit={this.handlerSubmit}/>
+      </Section>
+      <Section title= "Contacts">
+        <FindByName value={filter} onChange={this.handleChange} />
+        <Contacts contact= {this.handleFilters()} onDelete={this.handleDelete} />
+      </Section>
+      </> 
+    )
   }
 }
 
-export { App };
+
