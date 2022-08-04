@@ -1,9 +1,9 @@
 import { Component } from 'react';
-import { PhonebookForm } from './PhonebookForm/PhonebookForm';
+import PhonebookForm from './PhonebookForm/PhonebookForm';
 import { Section } from './Section/Section';
 
 import Contacts from './Contacts/Contacts';
-import { FindByName } from './FindByName/FindByName';
+import FindByName from './FindByName/FindByName';
 
 export class App extends Component {
   // state= {

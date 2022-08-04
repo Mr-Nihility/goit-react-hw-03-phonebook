@@ -4,7 +4,6 @@ import { NameInput } from './NameInput';
 import { PhoneInput } from './PhoneInput';
 // import PropTypes from 'prop-types';
 import { addUser } from 'redux/contacts/contacts-actions';
-
 import { connect } from 'react-redux';
 
 export class PhonebookForm extends Component {
@@ -36,13 +35,13 @@ export class PhonebookForm extends Component {
   handSubmit = event => {
     event.preventDefault();
     console.log(this.props);
-    // const isHere = this.props.items.some(
-    //   ({ name }) => name === this.state.name
-    // );
-    // if (isHere) {
-    //   alert(`Name already in contacts`);
-    //   return;
-    // }
+    const isHere = this.props.items.some(
+      ({ name }) => name === this.state.name
+    );
+    if (isHere) {
+      alert(`Name already in contacts`);
+      return;
+    }
     this.props.onAddContact({ ...this.state });
 
     this.setState({ name: '', phone: '' });
@@ -67,11 +66,11 @@ export class PhonebookForm extends Component {
     );
   }
 }
-// const mapStateToProps = state => {
-//   const { items } = state.contacts;
-//   return { items: items };
-// };
+const mapStateToProps = state => {
+  const { items } = state.contacts;
+  return { items: items };
+};
 const mapDispatchToProps = dispatch => ({
   onAddContact: user => dispatch(addUser(user)),
 });
-export default connect(null, mapDispatchToProps)(PhonebookForm);
+export default connect(mapStateToProps, mapDispatchToProps)(PhonebookForm);
